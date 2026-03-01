@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DustbinArmy - Deploy Dustbins Where They're Needed</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Fraunces:wght@300;600;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --earth-brown: #4a3f35;
+            --leaf-green: #2d5016;
+            --sky-blue: #87ceeb;
+            --soil: #8b7355;
+            --clean-white: #fafaf8;
+            --accent-orange: #ff6b35;
+            --shadow: rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background: var(--clean-white);
+            color: var(--earth-brown);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(250, 250, 248, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 2px solid var(--earth-brown);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Fraunces', serif;
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: var(--leaf-green);
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--earth-brown);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 700;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-orange);
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 80px;
+            min-height: 85vh;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, var(--sky-blue) 0%, var(--clean-white) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(45, 80, 22, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 107, 53, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content h1 {
+            font-family: 'Fraunces', serif;
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1.1;
+            color: var(--earth-brown);
+            margin-bottom: 1.5rem;
+            animation: slideInLeft 0.8s ease-out;
+        }
+
+        .hero-content p {
+            font-size: 1.1rem;
+            color: var(--soil);
+            margin-bottom: 2rem;
+            animation: slideInLeft 0.8s ease-out 0.2s backwards;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            animation: slideInLeft 0.8s ease-out 0.4s backwards;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 4px 4px 0 var(--earth-brown);
+        }
+
+        .btn-primary:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 var(--earth-brown);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--earth-brown);
+            border: 2px solid var(--earth-brown);
+        }
+
+        .btn-secondary:hover {
+            background: var(--earth-brown);
+            color: white;
+        }
+
+        /* Live Stats Card */
+        .stats-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 0;
+            border: 3px solid var(--earth-brown);
+            box-shadow: 8px 8px 0 rgba(45, 80, 22, 0.2);
+            animation: slideInRight 0.8s ease-out 0.3s backwards;
+        }
+
+        .stat-item {
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--soil);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-family: 'Fraunces', serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--leaf-green);
+            line-height: 1;
+        }
+
+        .stat-value.animate {
+            animation: countUp 2s ease-out;
+        }
+
+        /* Progress Bar */
+        .progress-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--earth-brown);
+        }
+
+        .progress-label {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: var(--earth-brown);
+        }
+
+        .progress-bar-container {
+            height: 30px;
+            background: var(--clean-white);
+            border: 2px solid var(--earth-brown);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--leaf-green);
+            width: 0%;
+            transition: width 1.5s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .progress-goal {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--soil);
+        }
+
+        /* Deployment Section */
+        .deployment-section {
+            padding: 6rem 2rem;
+            background: white;
+        }
+
+        .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-family: 'Fraunces', serif;
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--earth-brown);
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            color: var(--soil);
+            font-size: 1.1rem;
+        }
+
+        .deployment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .deployment-card {
+            background: var(--clean-white);
+            border: 2px solid var(--earth-brown);
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+
+        .deployment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px var(--shadow);
+        }
+
+        .deployment-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, var(--soil) 0%, var(--leaf-green) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+        }
+
+        .deployment-content {
+            padding: 1.5rem;
+        }
+
+        .deployment-location {
+            font-family: 'Fraunces', serif;
+            font-weight: 600;
+            font-size: 1.3rem;
+            color: var(--earth-brown);
+            margin-bottom: 0.5rem;
+        }
+
+        .deployment-status {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: var(--leaf-green);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        .deployment-status.pending {
+            background: var(--accent-orange);
+        }
+
+        .deployment-details {
+            font-size: 0.9rem;
+            color: var(--soil);
+            line-height: 1.8;
+        }
+
+        /* Request Section */
+        .request-section {
+            padding: 6rem 2rem;
+            background: linear-gradient(180deg, white 0%, var(--clean-white) 100%);
+        }
+
+        .request-form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 3rem;
+            border: 3px solid var(--earth-brown);
+            box-shadow: 12px 12px 0 rgba(45, 80, 22, 0.15);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--earth-brown);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--earth-brown);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            background: var(--clean-white);
+            transition: all 0.3s;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--accent-orange);
+            background: white;
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* Blog Section */
+        .blog-section {
+            padding: 6rem 2rem;
+            background: var(--earth-brown);
+            color: var(--clean-white);
+        }
+
+        .blog-section .section-title {
+            color: var(--clean-white);
+        }
+
+        .blog-section .section-subtitle {
+            color: var(--soil);
+        }
+
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .blog-card {
+            background: var(--clean-white);
+            color: var(--earth-brown);
+            border: 2px solid var(--clean-white);
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .blog-card:hover {
+            transform: scale(1.02);
+        }
+
+        .blog-image {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, var(--leaf-green) 0%, var(--sky-blue) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .blog-content {
+            padding: 1.5rem;
+        }
+
+        .blog-title {
+            font-family: 'Fraunces', serif;
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .blog-excerpt {
+            font-size: 0.85rem;
+            color: var(--soil);
+            line-height: 1.6;
+        }
+
+        .blog-read-more {
+            margin-top: 1rem;
+            color: var(--accent-orange);
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Sticky Donate Button */
+        .sticky-donate {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 999;
+        }
+
+        .sticky-donate .btn {
+            padding: 1.2rem 2.5rem;
+            font-size: 1.1rem;
+            animation: pulse 2s infinite;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--earth-brown);
+            color: var(--clean-white);
+            padding: 3rem 2rem;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+        }
+
+        .footer-section h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: var(--soil);
+            text-decoration: none;
+            font-size: 0.9rem;
+            line-height: 2;
+            display: block;
+        }
+
+        .footer-section a:hover {
+            color: var(--accent-orange);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--soil);
+            color: var(--soil);
+            font-size: 0.85rem;
+        }
+
+        /* Animations */
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.8rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .request-form {
+                padding: 2rem;
+            }
+
+            .sticky-donate {
+                bottom: 1rem;
+                right: 1rem;
+            }
+
+            .sticky-donate .btn {
+                padding: 1rem 1.5rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Modal for Donation */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 3rem;
+            max-width: 500px;
+            width: 90%;
+            border: 3px solid var(--earth-brown);
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--earth-brown);
+            border: none;
+            background: none;
+        }
+
+        .donation-amounts {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .amount-btn {
+            padding: 1.5rem;
+            border: 2px solid var(--earth-brown);
+            background: var(--clean-white);
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .amount-btn:hover,
+        .amount-btn.selected {
+            background: var(--leaf-green);
+            color: white;
+        }
+
+        .custom-amount-group {
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">DustbinArmy</div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#deployments">Deployments</a></li>
+                <li><a href="#request">Request</a></li>
+                <li><a href="#awareness">Awareness</a></li>
+                <li><a href="#donate" class="donate-link">Donate</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1>Every Dustbin Placed is a Step Toward Cleaner India</h1>
+                <p>Join the DustbinArmy - We identify areas in need and deploy dustbins where they matter most. Your contribution creates lasting impact on our communities.</p>
+                <div class="cta-buttons">
+                    <a href="#donate" class="btn btn-primary donate-trigger">Donate Now</a>
+                    <a href="#request" class="btn btn-secondary">Request a Dustbin</a>
+                </div>
+            </div>
+            <div class="stats-card">
+                <div class="stat-item">
+                    <div class="stat-label">Total Raised</div>
+                    <div class="stat-value" id="totalRaised">₹0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Dustbins Deployed</div>
+                    <div class="stat-value" id="dustbinsDeployed">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Total Donors</div>
+                    <div class="stat-value" id="totalDonors">0</div>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-label">Next Deployment Goal</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progressBar">0%</div>
+                    </div>
+                    <div class="progress-goal">Target: ₹25,000 for Sector 12, Noida</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Deployment Section -->
+    <section class="deployment-section" id="deployments">
+        <div class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Where We're Deploying</h2>
+                <p class="section-subtitle">Real impact, real locations, real change</p>
+            </div>
+            <div class="deployment-grid">
+                <div class="deployment-card">
+                    <div class="deployment-image">🗑️</div>
+                    <div class="deployment-content">
+                        <h3 class="deployment-location">Gandhi Park, Delhi</h3>
+                        <span class="deployment-status">Deployed ✓</span>
+                        <div class="deployment-details">
+                            <strong>Date:</strong> Feb 20, 2026<br>
+                            <strong>Dustbins:</strong> 5 units<br>
+                            <strong>Impact:</strong> Serving 800+ daily visitors<br>
+                            <strong>Cost:</strong> ₹12,500
+                        </div>
+                    </div>
+                </div>
+
+                <div class="deployment-card">
+                    <div class="deployment-image">🌳</div>
+                    <div class="deployment-content">
+                        <h3 class="deployment-location">Sector 12, Noida</h3>
+                        <span class="deployment-status pending">Next Deployment</span>
+                        <div class="deployment-details">
+                            <strong>Scheduled:</strong> March 15, 2026<br>
+                            <strong>Dustbins Needed:</strong> 10 units<br>
+                            <strong>Area:</strong> Market complex<br>
+                            <strong>Required:</strong> ₹25,000
+                        </div>
+                    </div>
+                </div>
+
+                <div class="deployment-card">
+                    <div class="deployment-image">🏫</div>
+                    <div class="deployment-content">
+                        <h3 class="deployment-location">Greenfield School, Mumbai</h3>
+                        <span class="deployment-status">Deployed ✓</span>
+                        <div class="deployment-details">
+                            <strong>Date:</strong> Jan 28, 2026<br>
+                            <strong>Dustbins:</strong> 8 units<br>
+                            <strong>Impact:</strong> 1,200 students<br>
+                            <strong>Cost:</strong> ₹20,000
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Request Section -->
+    <section class="request-section" id="request">
+        <div class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Request a Dustbin</h2>
+                <p class="section-subtitle">Know a place that needs dustbins? Tell us about it</p>
+            </div>
+            <form class="request-form" action="https://formsubmit.co/your-email@example.com" method="POST">
+                <div class="form-group">
+                    <label class="form-label" for="name">Your Name *</label>
+                    <input type="text" id="name" name="name" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="email">Email *</label>
+                    <input type="email" id="email" name="email" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="location">Location Address *</label>
+                    <input type="text" id="location" name="location" class="form-input" placeholder="Full address with landmark" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="place-type">Place Type *</label>
+                    <select id="place-type" name="place_type" class="form-select" required>
+                        <option value="">Select type</option>
+                        <option value="park">Park</option>
+                        <option value="school">School/College</option>
+                        <option value="market">Market Area</option>
+                        <option value="street">Street/Road</option>
+                        <option value="residential">Residential Area</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="reason">Why is a dustbin needed here? *</label>
+                    <textarea id="reason" name="reason" class="form-textarea" placeholder="Describe the problem and how many people would benefit" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="footfall">Estimated Daily Footfall</label>
+                    <input type="text" id="footfall" name="footfall" class="form-input" placeholder="Approximate number of people">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Request</button>
+                <input type="hidden" name="_subject" value="New DustbinArmy Request">
+                <input type="hidden" name="_captcha" value="false">
+            </form>
+        </div>
+    </section>
+
+    <!-- Blog/Awareness Section -->
+    <section class="blog-section" id="awareness">
+        <div class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Awareness & Impact</h2>
+                <p class="section-subtitle">Stories, insights, and the power of cleanliness</p>
+            </div>
+            <div class="blog-grid">
+                <div class="blog-card">
+                    <div class="blog-image">♻️</div>
+                    <div class="blog-content">
+                        <h3 class="blog-title">The Real Cost of Littering</h3>
+                        <p class="blog-excerpt">India spends over ₹50,000 crores annually on waste management. Learn how proper dustbin placement can reduce this burden.</p>
+                        <div class="blog-read-more">Read More →</div>
+                    </div>
+                </div>
+                <div class="blog-card">
+                    <div class="blog-image">🌍</div>
+                    <div class="blog-content">
+                        <h3 class="blog-title">How Gandhi Park Became Clean</h3>
+                        <p class="blog-excerpt">A case study of our first deployment. See how 5 dustbins transformed a neighborhood park in just 30 days.</p>
+                        <div class="blog-read-more">Read More →</div>
+                    </div>
+                </div>
+                <div class="blog-card">
+                    <div class="blog-image">📊</div>
+                    <div class="blog-content">
+                        <h3 class="blog-title">Waste Segregation 101</h3>
+                        <p class="blog-excerpt">A simple visual guide to separating wet, dry, and hazardous waste. Small actions, massive impact.</p>
+                        <div class="blog-read-more">Read More →</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>DustbinArmy</h3>
+                <p>Deploying dustbins where they're needed most. One dustbin at a time, we're building a cleaner India.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <a href="#home">Home</a>
+                <a href="#deployments">Deployments</a>
+                <a href="#request">Request Dustbin</a>
+                <a href="#awareness">Awareness</a>
+            </div>
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <a href="mailto:info@dustbinarmy.org">info@dustbinarmy.org</a>
+                <a href="tel:+919876543210">+91 98765 43210</a>
+                <p>Follow us on social media for updates</p>
+            </div>
+            <div class="footer-section">
+                <h3>Legal</h3>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Refund Policy</a>
+                <a href="#">80G Certificate</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 DustbinArmy. All rights reserved. | Powered by community action</p>
+        </div>
+    </footer>
+
+    <!-- Sticky Donate Button -->
+    <div class="sticky-donate">
+        <button class="btn btn-primary donate-trigger">💚 Donate</button>
+    </div>
+
+    <!-- Donation Modal -->
+    <div class="modal" id="donateModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeDonateModal()">&times;</button>
+            <h2 style="font-family: 'Fraunces', serif; font-size: 2rem; margin-bottom: 1rem;">Make a Donation</h2>
+            <p style="color: var(--soil); margin-bottom: 2rem;">Choose an amount or enter a custom donation</p>
+            
+            <div class="donation-amounts">
+                <button class="amount-btn" data-amount="500">₹500<br><small>Supporter</small></button>
+                <button class="amount-btn" data-amount="2500">₹2,500<br><small>1 Dustbin</small></button>
+                <button class="amount-btn" data-amount="5000">₹5,000<br><small>2 Dustbins</small></button>
+                <button class="amount-btn" data-amount="25000">₹25,000<br><small>10 Dustbins</small></button>
+            </div>
+
+            <div class="custom-amount-group">
+                <label class="form-label">Custom Amount (₹)</label>
+                <input type="number" id="customAmount" class="form-input" placeholder="Enter amount" min="100">
+            </div>
+
+            <button class="btn btn-primary" onclick="proceedToPayment()" style="width: 100%; margin-top: 1rem;">Proceed to Payment</button>
+            
+            <p style="font-size: 0.8rem; color: var(--soil); margin-top: 1rem; text-align: center;">
+                Secured by Razorpay | All donations are tax deductible
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Simulate real-time data (In production, fetch from your backend)
+        let donationData = {
+            totalRaised: 47500,
+            dustbinsDeployed: 23,
+            totalDonors: 156,
+            nextGoal: 25000,
+            currentProgress: 15000
+        };
+
+        // Animate counters on load
+        function animateValue(element, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const value = Math.floor(progress * (end - start) + start);
+                
+                if (element.id === 'totalRaised') {
+                    element.textContent = '₹' + value.toLocaleString('en-IN');
+                } else {
+                    element.textContent = value;
+                }
+                
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // Initialize stats on page load
+        window.addEventListener('load', () => {
+            animateValue(document.getElementById('totalRaised'), 0, donationData.totalRaised, 2000);
+            animateValue(document.getElementById('dustbinsDeployed'), 0, donationData.dustbinsDeployed, 2000);
+            animateValue(document.getElementById('totalDonors'), 0, donationData.totalDonors, 2000);
+            
+            // Animate progress bar
+            setTimeout(() => {
+                const progressPercent = (donationData.currentProgress / donationData.nextGoal) * 100;
+                const progressBar = document.getElementById('progressBar');
+                progressBar.style.width = progressPercent + '%';
+                progressBar.textContent = Math.round(progressPercent) + '%';
+            }, 500);
+        });
+
+        // Donation Modal
+        let selectedAmount = 0;
+
+        document.querySelectorAll('.donate-trigger').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('donateModal').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+        });
+
+        function closeDonateModal() {
+            document.getElementById('donateModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Amount selection
+        document.querySelectorAll('.amount-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedAmount = parseInt(this.dataset.amount);
+                document.getElementById('customAmount').value = '';
+            });
+        });
+
+        document.getElementById('customAmount').addEventListener('input', function() {
+            document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+            selectedAmount = parseInt(this.value) || 0;
+        });
+
+        // Payment processing
+        function proceedToPayment() {
+            if (selectedAmount < 100) {
+                alert('Please select or enter an amount of at least ₹100');
+                return;
+            }
+
+            // In production, integrate with Razorpay here
+            // This is a placeholder for the Razorpay integration
+            alert(`Initiating Razorpay payment for ₹${selectedAmount}...\n\nIn production, this will open Razorpay payment gateway.`);
+            
+            // Simulate successful donation (remove in production)
+            setTimeout(() => {
+                donationData.totalRaised += selectedAmount;
+                donationData.totalDonors += 1;
+                donationData.currentProgress += selectedAmount;
+                
+                // Update UI
+                document.getElementById('totalRaised').textContent = '₹' + donationData.totalRaised.toLocaleString('en-IN');
+                document.getElementById('totalDonors').textContent = donationData.totalDonors;
+                
+                const progressPercent = (donationData.currentProgress / donationData.nextGoal) * 100;
+                const progressBar = document.getElementById('progressBar');
+                progressBar.style.width = Math.min(progressPercent, 100) + '%';
+                progressBar.textContent = Math.round(Math.min(progressPercent, 100)) + '%';
+                
+                closeDonateModal();
+                alert('Thank you for your donation! 🎉\n\nYou will receive a confirmation email shortly.');
+            }, 1000);
+        }
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Close modal on outside click
+        document.getElementById('donateModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDonateModal();
+            }
+        });
+
+        // Simulate real-time updates (every 30 seconds)
+        setInterval(() => {
+            // In production, fetch real data from your backend
+            // This simulates new donations coming in
+            if (Math.random() > 0.7) {
+                const randomDonation = [500, 1000, 2500][Math.floor(Math.random() * 3)];
+                donationData.totalRaised += randomDonation;
+                donationData.totalDonors += 1;
+                donationData.currentProgress += randomDonation;
+                
+                document.getElementById('totalRaised').textContent = '₹' + donationData.totalRaised.toLocaleString('en-IN');
+                document.getElementById('totalDonors').textContent = donationData.totalDonors;
+                
+                const progressPercent = (donationData.currentProgress / donationData.nextGoal) * 100;
+                const progressBar = document.getElementById('progressBar');
+                progressBar.style.width = Math.min(progressPercent, 100) + '%';
+                progressBar.textContent = Math.round(Math.min(progressPercent, 100)) + '%';
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
